@@ -39,13 +39,13 @@ var functions = map[string](func(x float64) float64){
 	"sin": math.Sin, "cos": math.Cos, "tan": math.Tan, "sqrt": math.Sqrt,
 }
 
-func mathExp(m *parser.Parser, op0 string) (result float64, err error) {
-	if result, err = valueExp(m); err != nil {
+func mathExp(p *parser.Parser, op0 string) (result float64, err error) {
+	if result, err = valueExp(p); err != nil {
 		return result, err
 	}
 
-	for op1 := operatorExp(m, op0); len(op1) > 0; op1 = operatorExp(m, op0) {
-		val, err := mathExp(m, op1)
+	for op1 := operatorExp(p, op0); len(op1) > 0; op1 = operatorExp(p, op0) {
+		val, err := mathExp(p, op1)
 		if err != nil {
 			return result, err
 		}
@@ -56,21 +56,21 @@ func mathExp(m *parser.Parser, op0 string) (result float64, err error) {
 	return
 }
 
-func valueExp(m *parser.Parser) (result float64, err error) {
-	if token, _ := m.FindNumber(); len(token) > 0 {
+func valueExp(p *parser.Parser) (result float64, err error) {
+	if token, _ := p.FindNumber(); len(token) > 0 {
 		return strconv.ParseFloat(token, 64)
-	} else if token, _ := m.Find(`^\s*\(`); len(token) > 0 {
-		result, err = mathExp(m, "=")
+	} else if token, _ := p.Find(`^\s*\(`); len(token) > 0 {
+		result, err = mathExp(p, "=")
 		if err != nil {
 			return
 		}
 
-		if token, _ := m.Find(`^\s*\)`); len(token) == 0 {
+		if token, _ := p.Find(`^\s*\)`); len(token) == 0 {
 			err = errors.New(") is expected")
 			return
 		}
-	} else if token, _ := m.Find(`^\s*(sin|cos|tan|sqrt)`); len(token) > 0 {
-		result, err = valueExp(m)
+	} else if token, _ := p.Find(`^\s*(sin|cos|tan|sqrt)`); len(token) > 0 {
+		result, err = valueExp(p)
 		if err != nil {
 			return
 		}
@@ -83,12 +83,12 @@ func valueExp(m *parser.Parser) (result float64, err error) {
 	return
 }
 
-func operatorExp(m *parser.Parser, op0 string) string {
-	offset := m.Offset
-	op1, _ := m.Find(`^\s*([+\-*\\])`)
+func operatorExp(p *parser.Parser, op0 string) string {
+	offset := p.Offset
+	op1, _ := p.Find(`^\s*([+\-*\\])`)
 
 	if !(operators[op0].priority < operators[op1].priority) {
-		m.Offset = offset
+		p.Offset = offset
 		return ""
 	}
 

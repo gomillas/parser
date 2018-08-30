@@ -29,10 +29,10 @@ func New(src string) *Parser {
 
 // Find returns the offset and the string matching a regular expression,
 // starting from the current Offset position.
-func (m *Parser) Find(expr string) (result string, offset int) {
+func (p *Parser) Find(expr string) (result string, offset int) {
 	re := regexp.MustCompile(expr)
 
-	substr := m.Source[m.Offset:]
+	substr := p.Source[p.Offset:]
 	loc := re.FindStringSubmatchIndex(substr)
 	if loc != nil {
 		i := 0
@@ -41,31 +41,31 @@ func (m *Parser) Find(expr string) (result string, offset int) {
 		}
 
 		result = substr[loc[i]:loc[i+1]]
-		offset = m.Offset + loc[i]
-		m.Offset += loc[1]
+		offset = p.Offset + loc[i]
+		p.Offset += loc[1]
 	}
 
 	return result, offset
 }
 
 // FindNumber returns the next number.
-func (m *Parser) FindNumber() (string, int) {
-	return m.Find(numberRegexp)
+func (p *Parser) FindNumber() (string, int) {
+	return p.Find(numberRegexp)
 }
 
 // FindID returns the next identifier.
-func (m *Parser) FindID() (string, int) {
-	return m.Find(idRegexp)
+func (p *Parser) FindID() (string, int) {
+	return p.Find(idRegexp)
 }
 
 // Line of the current offset.
-func (m *Parser) Line() int {
-	return strings.Count(m.Source[:m.Offset], "\n") + 1
+func (p *Parser) Line() int {
+	return strings.Count(p.Source[:p.Offset], "\n") + 1
 }
 
 // Column of the current offset.
-func (m *Parser) Column(params ...int) int {
-	substr := m.Source[:m.Offset]
+func (p *Parser) Column(params ...int) int {
+	substr := p.Source[:p.Offset]
 	pos := strings.LastIndex(substr, "\n")
 
 	if pos > -1 {
